@@ -1,10 +1,13 @@
+import os
 import pyodbc
 import logging
 import requests
 
+dir = os.getcwd()
+print('path (dir): ', dir)
 
 format_log = '%(asctime)s; %(levelname)s; %(message)s'
-logging.basicConfig(filename='send_log', level=logging.INFO, format=format_log)
+logging.basicConfig(filename=dir+'/send_log', level=logging.INFO, format=format_log)
 
 
 def send():
@@ -24,7 +27,7 @@ def send():
         if status == '200':
             # записать в файл последний отправленный id вагона
             if data:
-                with open('last_id_vagon', 'w') as file:
+                with open(dir+'/last_id', 'w') as file:
                     file.write(str(data[-1][0]))
             logging.info('success send ' + str(len(data)) + ' ids (status_code: ' + status + ')')
         else:
@@ -35,16 +38,17 @@ def wagons():
     # соединение с локальной БД
     conn_str = (
         r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
-        r'DBQ=C:\Users\HPP\AppData\Local\VirtualStore\Program Files\TechnowagyLTD\VagonScale\VagonVaga\Database\vagonvaga.mdb;'
-        # r'DBQ=\vagonvaga.mdb;'
+        # r'DBQ=C:\Users\HPP\AppData\Local\VirtualStore\Program Files\TechnowagyLTD\VagonScale\VagonVaga\Database\vagonvaga.mdb;'
+        r'DBQ=\vagonvaga.mdb;'
         r'PWD=2708351'
         )
     cnxn = pyodbc.connect(conn_str)
     crsr = cnxn.cursor()
 
     # чтение из файла последнего отправленного id
-    with open("last_id_vagon") as file:
+    with open(dir+'/last_id') as file:
         last_id = int(file.read())
+        print('last wagon id: ', last_id)
 
     # запрос свежих записей в БД
     crsr.execute("""SELECT  id_vagon, brutto, tara, netto, nom_vagon,
