@@ -3,17 +3,15 @@ import pyodbc
 import logging
 import requests
 
-dir = os.getcwd()
-print('path (dir): ', dir)
+cwd = os.getcwd()
 
 format_log = '%(asctime)s; %(levelname)s; %(message)s'
-logging.basicConfig(filename=dir+'/send_log', level=logging.INFO, format=format_log)
+logging.basicConfig(filename=cwd+'\\send_log', level=logging.INFO, format=format_log)
 
 
 def send():
-    # host = 'http://192.168.0.117:5000/'
-    host = 'http://78.109.28.77/'
-    # host = 'https://appfarm.org/'
+    host = 'https://appfarm.org/'
+    # host = 'http://78.109.28.77/'
     api = 'fields/api/v01/train_weight'
     storage = 'Фастів ХПП'
     data = wagons()
@@ -27,7 +25,7 @@ def send():
         if status == '200':
             # записать в файл последний отправленный id вагона
             if data:
-                with open(dir+'/last_id', 'w') as file:
+                with open(cwd+'\\last_id', 'w') as file:
                     file.write(str(data[-1][0]))
             logging.info('success send ' + str(len(data)) + ' ids (status_code: ' + status + ')')
         else:
@@ -39,16 +37,16 @@ def wagons():
     conn_str = (
         r'DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};'
         # r'DBQ=C:\Users\HPP\AppData\Local\VirtualStore\Program Files\TechnowagyLTD\VagonScale\VagonVaga\Database\vagonvaga.mdb;'
-        r'DBQ=\vagonvaga.mdb;'
+        r'DBQ=' + cwd + '\\vagonvaga.mdb;'
         r'PWD=2708351'
         )
+
     cnxn = pyodbc.connect(conn_str)
     crsr = cnxn.cursor()
 
     # чтение из файла последнего отправленного id
-    with open(dir+'/last_id') as file:
+    with open(cwd+'\\last_id') as file:
         last_id = int(file.read())
-        print('last wagon id: ', last_id)
 
     # запрос свежих записей в БД
     crsr.execute("""SELECT  id_vagon, brutto, tara, netto, nom_vagon,
